@@ -1,6 +1,6 @@
 {
   "name": "@talaikis/crypto-utils",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React Native Crypto, etc. utils",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
