@@ -2,8 +2,7 @@
   "name": "@talaikis/crypto-utils",
   "version": "0.1.1",
   "description": "React Native Crypto, etc. utils",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
+  "main": "src/index.tsx",
   "types": "lib/typescript/src/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
@@ -26,10 +25,8 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-utils-example",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "release": "release-it"
   },
@@ -52,15 +49,26 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "17.0.2",
-    "@evilmartians/lefthook": "1.5.0",
-    "@react-native/eslint-config": "0.73.1",
+    "@babel/eslint-parser": "7.22.15",
     "@release-it/conventional-changelog": "5.0.0",
     "@types/jest": "29.5.5",
     "@types/react": "18.2.44",
     "commitlint": "17.0.2",
     "del-cli": "5.1.0",
-    "eslint": "8.51.0",
+    "eslint": "8.19.0",
+    "eslint-config-standard": "16.0.3",
+    "eslint-plugin-import": "2.25.3",
+    "eslint-plugin-json-es": "1.5.7",
+    "eslint-plugin-mocha": "10.0.3",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "6.0.0",
+    "eslint-plugin-react": "7.27.1",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-react-perf": "3.3.1",
+    "eslint-plugin-react-props-in-state": "1.0.7",
+    "eslint-plugin-security": "2.0.0",
+    "eslint-plugin-spellcheck": "0.0.19",
+    "globals": "15.11.0",
     "jest": "29.7.0",
     "react": "18.2.0",
     "react-native": "0.73.5",
@@ -76,14 +84,10 @@
     "react": "*",
     "react-native": "*"
   },
-  "workspaces": [
-    "example"
-  ],
   "packageManager": "yarn@3.6.1",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ]
   },
