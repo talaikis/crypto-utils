@@ -100,10 +100,12 @@ class UtilsModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    fun generateAESKey(keySize: Int = 256, promise: Promise): String {
+    fun generateAESKey(keySize: Int = 256, promise: Promise) {
         val keyGen = KeyGenerator.getInstance("AES")
         keyGen.init(keySize, SecureRandom())
-        return promise.resolve(encodeKeyToBase64(keyGen.generateKey()))
+        val secretKey = keyGen.generateKey()
+        val base64Key = encodeKeyToBase64(secretKey)
+        promise.resolve(base64Key)
     }
 
     private fun encodeKeyToBase64(key: SecretKey): String {
@@ -126,7 +128,7 @@ class UtilsModule(reactContext: ReactApplicationContext) :
         val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
         val ivBase64 = Base64.getEncoder().encodeToString(iv)
         val encryptedBase64 = Base64.getEncoder().encodeToString(encrypted)
-        return promise.resolve("$ivBase64:$encryptedBase64"))
+        promise.resolve("$ivBase64:$encryptedBase64")
     }
 
     @ReactMethod
@@ -145,7 +147,7 @@ class UtilsModule(reactContext: ReactApplicationContext) :
         val ivSpec = IvParameterSpec(iv)
         cipher.init(Cipher.DECRYPT_MODE, key, ivSpec)
         val decryptedBytes = cipher.doFinal(encryptedBytes)
-        return promise.resolve(String(decryptedBytes, Charsets.UTF_8))
+        promise.resolve(String(decryptedBytes, Charsets.UTF_8))
     }
 
     companion object {
