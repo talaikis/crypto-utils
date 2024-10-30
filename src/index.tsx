@@ -29,3 +29,15 @@ export async function generateKeyPair (length: number, algorithm: string): Promi
 export async function signData (data: string, privateKey: string): Promise<string> {
   return await Utils.signData(data, privateKey)
 }
+
+export async function generateAESKey (keySize: Number): Promise<string> {
+  return await Utils.generateAESKey(keySize)
+}
+
+export async function aesEncrypt (plaintext: String, key: String): Promise<string> {
+  return await Utils.aesEncrypt(plaintext, key)
+}
+
+export async function aesDecrypt (encryptedData: String, key: String): Promise<string> {
+  return await Utils.aesDecrypt(encryptedData, key)
+}

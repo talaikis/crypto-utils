@@ -14,6 +14,11 @@ import java.util.Base64
 import java.security.Signature
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import java.security.SecureRandom
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
 
 class UtilsModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -92,6 +97,55 @@ class UtilsModule(reactContext: ReactApplicationContext) :
         } catch (e: Exception) {
             promise.reject("SIGN_DATA_ERROR", e)
         }
+    }
+
+    @ReactMethod
+    fun generateAESKey(keySize: Int = 256, promise: Promise): String {
+        val keyGen = KeyGenerator.getInstance("AES")
+        keyGen.init(keySize, SecureRandom())
+        return promise.resolve(encodeKeyToBase64(keyGen.generateKey()))
+    }
+
+    private fun encodeKeyToBase64(key: SecretKey): String {
+        return Base64.getEncoder().encodeToString(key.encoded)
+    }
+
+    private fun decodeKeyFromBase64(base64Key: String): SecretKey {
+        val decodedKey = Base64.getDecoder().decode(base64Key)
+        return javax.crypto.spec.SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+    }
+
+    @ReactMethod
+    fun aesEncrypt(plaintext: String, encryptionKey: String, promise: Promise) {
+        val key = decodeKeyFromBase64(encryptionKey)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val iv = ByteArray(cipher.blockSize)
+        SecureRandom().nextBytes(iv)
+        val ivSpec = IvParameterSpec(iv)
+        cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec)
+        val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
+        val ivBase64 = Base64.getEncoder().encodeToString(iv)
+        val encryptedBase64 = Base64.getEncoder().encodeToString(encrypted)
+        return promise.resolve("$ivBase64:$encryptedBase64"))
+    }
+
+    @ReactMethod
+    fun aesDecrypt(encryptedData: String, encryptionKey: String, promise: Promise) {
+        val key = decodeKeyFromBase64(encryptionKey)
+        val parts = encryptedData.split(":")
+        if (parts.size != 2) {
+            throw IllegalArgumentException("Invalid encrypted data format. Expected 'IV:ciphertext'")
+        }
+
+        val ivBase64 = parts[0]
+        val encryptedBase64 = parts[1]
+        val iv = Base64.getDecoder().decode(ivBase64)
+        val encryptedBytes = Base64.getDecoder().decode(encryptedBase64)
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        val ivSpec = IvParameterSpec(iv)
+        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec)
+        val decryptedBytes = cipher.doFinal(encryptedBytes)
+        return promise.resolve(String(decryptedBytes, Charsets.UTF_8))
     }
 
     companion object {

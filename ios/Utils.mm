@@ -7,6 +7,23 @@ RCT_EXTERN_METHOD(sha256:(NSString *)input
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+// generateAESKey
+RCT_EXTERN_METHOD(generateAESKey:(NSNumber *)keySize
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+// aesEncrypt
+RCT_EXTERN_METHOD(aesEncrypt:(nonnull NSString *)plaintext
+                  encryptionKey:(NSString *)encryptionKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+// aesDecrypt
+RCT_EXTERN_METHOD(aesDecrypt:(nonnull NSString *)encryptedData
+                  encryptionKey:(NSString *)encryptionKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 // generateKeyPair method
 RCT_EXTERN_METHOD(generateKeyPair:(nonnull NSNumber *)length
                   algo:(NSString *)algo

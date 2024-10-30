@@ -1,6 +1,7 @@
 import Foundation
 import React
 import Security
+import CommonCrypto
 
 @objc(Utils)
 class Utils: NSObject {
@@ -12,7 +13,154 @@ class Utils: NSObject {
     resolve(result)
   }
 
-  @objc
+  @objc(generateAESKey:resolver:rejecter:)
+    func generateAESKey(keySize: NSNumber = 256, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        let keySizeInt = keySize.intValue
+        guard keySizeInt == 128 || keySizeInt == 192 || keySizeInt == 256 else {
+            rejecter("INVALID_KEY_SIZE", "Key size must be 128, 192, or 256 bits.", nil)
+            return
+        }
+
+        var keyData = Data(count: keySizeInt / 8)
+        let result = keyData.withUnsafeMutableBytes {
+            SecRandomCopyBytes(kSecRandomDefault, keyData.count, $0.baseAddress!)
+        }
+
+        if result == errSecSuccess {
+            let base64Key = keyData.base64EncodedString()
+            resolver(base64Key)
+        } else {
+            rejecter("KEY_GENERATION_FAILED", "Failed to generate AES key.", nil)
+        }
+    }
+
+    // MARK: - AES Encryption
+
+    @objc(aesEncrypt:encryptionKey:resolver:rejecter:)
+    func aesEncrypt(plaintext: String, encryptionKey: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        guard let keyData = Data(base64Encoded: encryptionKey) else {
+            rejecter("INVALID_KEY", "Encryption key is not valid Base64.", nil)
+            return
+        }
+
+        let ivSize = kCCBlockSizeAES128
+        var iv = Data(count: ivSize)
+        let ivResult = iv.withUnsafeMutableBytes {
+            SecRandomCopyBytes(kSecRandomDefault, ivSize, $0.baseAddress!)
+        }
+
+        if ivResult != errSecSuccess {
+            rejecter("IV_GENERATION_FAILED", "Failed to generate IV.", nil)
+            return
+        }
+
+        guard let plaintextData = plaintext.data(using: .utf8) else {
+            rejecter("INVALID_PLAINTEXT", "Plaintext is not valid UTF-8.", nil)
+            return
+        }
+
+        let encryptedData = crypt(operation: CCOperation(kCCEncrypt),
+                                  data: plaintextData,
+                                  key: keyData,
+                                  iv: iv)
+
+        switch encryptedData {
+        case .success(let cipherData):
+            let ivBase64 = iv.base64EncodedString()
+            let encryptedBase64 = cipherData.base64EncodedString()
+            let combined = "\(ivBase64):\(encryptedBase64)"
+            resolver(combined)
+        case .failure(let error):
+            rejecter("ENCRYPTION_FAILED", error.localizedDescription, error)
+        }
+    }
+
+    // MARK: - AES Decryption
+
+    @objc(aesDecrypt:encryptionKey:resolver:rejecter:)
+    func aesDecrypt(encryptedData: String, encryptionKey: String, resolver: @escaping RCTPromiseResolveBlock, rejecter: @escaping RCTPromiseRejectBlock) {
+        let components = encryptedData.split(separator: ":").map { String($0) }
+        guard components.count == 2 else {
+            rejecter("INVALID_FORMAT", "Invalid encrypted data format. Expected 'IV:ciphertext'", nil)
+            return
+        }
+
+        let ivBase64 = components[0]
+        let encryptedBase64 = components[1]
+
+        guard let iv = Data(base64Encoded: ivBase64),
+              let cipherData = Data(base64Encoded: encryptedBase64) else {
+            rejecter("INVALID_BASE64", "IV or ciphertext is not valid Base64.", nil)
+            return
+        }
+
+        guard let keyData = Data(base64Encoded: encryptionKey) else {
+            rejecter("INVALID_KEY", "Encryption key is not valid Base64.", nil)
+            return
+        }
+
+        let decryptedData = crypt(operation: CCOperation(kCCDecrypt),
+                                  data: cipherData,
+                                  key: keyData,
+                                  iv: iv)
+
+        switch decryptedData {
+        case .success(let plainData):
+            if let decryptedString = String(data: plainData, encoding: .utf8) {
+                resolver(decryptedString)
+            } else {
+                rejecter("DECRYPTION_FAILED", "Failed to convert decrypted data to string.", nil)
+            }
+        case .failure(let error):
+            rejecter("DECRYPTION_FAILED", error.localizedDescription, error)
+        }
+    }
+
+    // MARK: - Helper Methods
+
+    private enum CryptoError: Error {
+        case cryptFailed(status: CCCryptorStatus)
+    }
+
+    private func crypt(operation: CCOperation, data: Data, key: Data, iv: Data) -> Result<Data, Error> {
+        let keyLength = key.count
+        let validKeyLengths = [kCCKeySizeAES128, kCCKeySizeAES192, kCCKeySizeAES256]
+        guard validKeyLengths.contains(keyLength) else {
+            return .failure(CryptoError.cryptFailed(status: CCCryptorStatus(kCCParamError)))
+        }
+
+        let dataLength = data.count
+        let cryptLength = dataLength + kCCBlockSizeAES128
+        var cryptData = Data(count: cryptLength)
+
+        var bytesProcessed: size_t = 0
+
+        let status = cryptData.withUnsafeMutableBytes { cryptBytes in
+            data.withUnsafeBytes { dataBytes in
+                iv.withUnsafeBytes { ivBytes in
+                    key.withUnsafeBytes { keyBytes in
+                        CCCrypt(operation,
+                                CCAlgorithm(kCCAlgorithmAES),
+                                CCOptions(kCCOptionPKCS7Padding),
+                                keyBytes.baseAddress, keyLength,
+                                ivBytes.baseAddress,
+                                dataBytes.baseAddress, dataLength,
+                                cryptBytes.baseAddress, cryptLength,
+                                &bytesProcessed)
+                    }
+                }
+            }
+        }
+
+        guard status == kCCSuccess else {
+            return .failure(CryptoError.cryptFailed(status: status))
+        }
+
+        cryptData.removeSubrange(bytesProcessed..<cryptData.count)
+        return .success(cryptData)
+    }
+
+    @objc
     func generateKeyPair(_ length: NSNumber, algo: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         do {
             // Determine the key type based on the algo string
