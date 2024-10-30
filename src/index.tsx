@@ -17,14 +17,15 @@ const Utils = NativeModules.Utils
     }
   )
 
-export function sha256 (a: string): Promise<string> {
-  return Utils.sha256(a)
+export async function sha256 (a: string): Promise<string> {
+  return await Utils.sha256(a)
 }
 
-export function generateKeyPair (length: number, algorithm: string): Promise<string> {
-  return JSON.parse(Utils.generateKeyPair(length, algorithm))
+export async function generateKeyPair (length: number, algorithm: string): Promise<string> {
+  const result = await Utils.generateKeyPair(length, algorithm)
+  return JSON.parse(result)
 }
 
-export function signData (data: string, privateKey: string): Promise<string> {
-  return Utils.signData(data, privateKey)
+export async function signData (data: string, privateKey: string): Promise<string> {
+  return await Utils.signData(data, privateKey)
 }
