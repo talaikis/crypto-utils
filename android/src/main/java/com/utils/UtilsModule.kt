@@ -101,11 +101,15 @@ class UtilsModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun generateAESKey(keySize: Int = 256, promise: Promise) {
-        val keyGen = KeyGenerator.getInstance("AES")
-        keyGen.init(keySize, SecureRandom())
-        val secretKey = keyGen.generateKey()
-        val base64Key = encodeKeyToBase64(secretKey)
-        promise.resolve(base64Key)
+        try {
+            val keyGen = KeyGenerator.getInstance("AES")
+            keyGen.init(keySize, SecureRandom())
+            val secretKey = keyGen.generateKey()
+            val base64Key = encodeKeyToBase64(secretKey)
+            promise.resolve(base64Key)
+        } catch (e: Exception) {
+            promise.reject("generateAESKey", e)
+        }
     }
 
     private fun encodeKeyToBase64(key: SecretKey): String {
@@ -119,16 +123,20 @@ class UtilsModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     fun aesEncrypt(plaintext: String, encryptionKey: String, promise: Promise) {
-        val key = decodeKeyFromBase64(encryptionKey)
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val iv = ByteArray(cipher.blockSize)
-        SecureRandom().nextBytes(iv)
-        val ivSpec = IvParameterSpec(iv)
-        cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec)
-        val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
-        val ivBase64 = Base64.getEncoder().encodeToString(iv)
-        val encryptedBase64 = Base64.getEncoder().encodeToString(encrypted)
-        promise.resolve("$ivBase64:$encryptedBase64")
+        try {
+            val key = decodeKeyFromBase64(encryptionKey)
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            val iv = ByteArray(cipher.blockSize)
+            SecureRandom().nextBytes(iv)
+            val ivSpec = IvParameterSpec(iv)
+            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec)
+            val encrypted = cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
+            val ivBase64 = Base64.getEncoder().encodeToString(iv)
+            val encryptedBase64 = Base64.getEncoder().encodeToString(encrypted)
+            promise.resolve("$ivBase64:$encryptedBase64")
+        } catch (e: Exception) {
+            promise.reject("aesEncrypt", e)
+        }
     }
 
     @ReactMethod
@@ -139,15 +147,19 @@ class UtilsModule(reactContext: ReactApplicationContext) :
             throw IllegalArgumentException("Invalid encrypted data format. Expected 'IV:ciphertext'")
         }
 
-        val ivBase64 = parts[0]
-        val encryptedBase64 = parts[1]
-        val iv = Base64.getDecoder().decode(ivBase64)
-        val encryptedBytes = Base64.getDecoder().decode(encryptedBase64)
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        val ivSpec = IvParameterSpec(iv)
-        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec)
-        val decryptedBytes = cipher.doFinal(encryptedBytes)
-        promise.resolve(String(decryptedBytes, Charsets.UTF_8))
+        try {
+            val ivBase64 = parts[0]
+            val encryptedBase64 = parts[1]
+            val iv = Base64.getDecoder().decode(ivBase64)
+            val encryptedBytes = Base64.getDecoder().decode(encryptedBase64)
+            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+            val ivSpec = IvParameterSpec(iv)
+            cipher.init(Cipher.DECRYPT_MODE, key, ivSpec)
+            val decryptedBytes = cipher.doFinal(encryptedBytes)
+            promise.resolve(String(decryptedBytes, Charsets.UTF_8))
+        } catch (e: Exception) {
+            promise.reject("aesDecrypt", e)
+        }
     }
 
     companion object {
