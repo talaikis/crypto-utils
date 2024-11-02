@@ -1,17 +1,17 @@
-# @talaikis/crypto-utils
+# rn-crypto-utils
 
 React Native Crypto, etc. utils
 
 ## Installation
 
 ```sh
-yarn add @talaikis/crypto-utils
+yarn add rn-crypto-utils
 ```
 
 ## Usage
 
 ```js
-import { sha256, generateKeyPair } from '@talaikis/crypto-utils';
+import { sha256, generateKeyPair, signData } from 'rn-crypto-utils';
 
 // ...
 
