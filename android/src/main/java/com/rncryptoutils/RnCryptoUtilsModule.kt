@@ -4,6 +4,21 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
+import java.security.MessageDigest
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.PrivateKey
+import java.security.PublicKey
+import org.json.JSONObject
+import java.util.Base64
+import java.security.Signature
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import java.security.SecureRandom
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
 
 class RnCryptoUtilsModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
