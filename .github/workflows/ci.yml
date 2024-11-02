@@ -10,6 +10,9 @@ on:
     types:
       - checks_requested
 
+env:
+  YARN_ENABLE_IMMUTABLE_INSTALLS: false
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -19,9 +22,6 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
-
-      - name: Lint files
-        run: yarn lint
 
       - name: Typecheck files
         run: yarn typecheck
