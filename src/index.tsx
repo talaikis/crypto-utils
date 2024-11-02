@@ -17,7 +17,6 @@ const RnCryptoUtils = NativeModules.RnCryptoUtils
       }
     );
 
-
 export async function sha256 (a: string): Promise<string> {
   return await RnCryptoUtils.sha256(a)
 }
@@ -42,4 +41,3 @@ export async function aesEncrypt (plaintext: String, key: String): Promise<strin
 export async function aesDecrypt (encryptedData: String, key: String): Promise<string> {
   return await RnCryptoUtils.aesDecrypt(encryptedData, key)
 }
-
