@@ -1,6 +1,6 @@
 {
   "name": "rn-crypto-utils",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "React Native crypto utilities",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
