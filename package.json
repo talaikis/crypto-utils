@@ -166,7 +166,8 @@
           "esm": true
         }
       ],
-      ["module",
+      [
+        "module",
         {
           "esm": true
         }
