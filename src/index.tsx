@@ -21,7 +21,7 @@ export async function sha256 (a: string): Promise<string> {
   return await Utils.sha256(a)
 }
 
-export async function generateKeyPair (length: number, algorithm: string): Promise<string> {
+export async function generateKeyPair (length: number, algorithm: string): Promise<any> {
   const result = await Utils.generateKeyPair(length, algorithm)
   return JSON.parse(result)
 }
