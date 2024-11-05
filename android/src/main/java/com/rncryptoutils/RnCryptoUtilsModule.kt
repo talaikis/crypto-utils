@@ -21,12 +21,51 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import kotlinx.coroutines.*
 import java.io.File
+import android.app.KeyguardManager
+import android.content.Context
+import android.os.Build
+import androidx.biometric.BiometricManager
 
 class RnCryptoUtilsModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
   override fun getName(): String {
     return NAME
+  }
+
+  @ReactMethod
+  fun getSecurityStatus(promise: Promise) {
+    try {
+        val context = reactApplicationContext
+        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+
+        val isPasscodeEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            keyguardManager.isDeviceSecure
+        } else {
+            @Suppress("DEPRECATION")
+            keyguardManager.isKeyguardSecure
+        }
+
+        val biometricManager = BiometricManager.from(context)
+        val canAuthenticate = biometricManager.canAuthenticate()
+
+        val isBiometricsEnabled = when (canAuthenticate) {
+            BiometricManager.BIOMETRIC_SUCCESS -> true
+            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
+            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> false
+            else -> false
+        }
+
+        val status = mapOf(
+            "isPasscodeEnabled" to isPasscodeEnabled,
+            "isBiometricsEnabled" to isBiometricsEnabled
+        )
+
+        promise.resolve(status)
+    } catch (e: Exception) {
+        promise.reject("Error", e)
+    }
   }
 
   private fun deleteRecursive(file: File): Boolean {

@@ -24,6 +24,9 @@ const decrypted = await aesDecrypt(encrypted, key);
 
 // andoird methods
 await clearCache()
+
+// other utilities
+const result = await getSecurityStatus()
 ```
 
 ## Contributing

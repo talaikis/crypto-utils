@@ -47,3 +47,7 @@ export async function aesEncrypt(plaintext: String, key: String): Promise<string
 export async function aesDecrypt(encryptedData: String, key: String): Promise<string> {
   return await RnCryptoUtils.aesDecrypt(encryptedData, key);
 }
+
+export async function getSecurityStatus() {
+  return await RnCryptoUtils.getSecurityStatus();
+}
