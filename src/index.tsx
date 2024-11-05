@@ -17,8 +17,10 @@ const RnCryptoUtils = NativeModules.RnCryptoUtils
       }
     );
 
-export async function clearCache(): Promise<void> {
-  return await RnCryptoUtils.clearInternalCache();
+export async function clearCache(): Promise<any> {
+  if (Platform.OS === 'android') {
+    await RnCryptoUtils.clearInternalCache();
+  }
 }
 
 export async function sha256(a: string): Promise<string> {
