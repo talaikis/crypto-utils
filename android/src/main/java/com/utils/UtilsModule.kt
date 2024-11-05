@@ -19,12 +19,80 @@ import javax.crypto.SecretKey
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
+import kotlinx.coroutines.*
+import java.io.File
+import android.app.KeyguardManager
+import android.content.Context
+import android.os.Build
 
-class UtilsModule(reactContext: ReactApplicationContext) :
+class UtilsModule(private val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
 
     override fun getName(): String {
         return NAME
+    }
+
+    @ReactMethod
+  fun getSecurityStatus(promise: Promise) {
+    try {
+        val context = reactApplicationContext
+        val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+
+        val isPasscodeEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            keyguardManager.isDeviceSecure
+        } else {
+            @Suppress("DEPRECATION")
+            keyguardManager.isKeyguardSecure
+        }
+
+        val status = mapOf(
+            "isPasscodeEnabled" to isPasscodeEnabled
+        )
+
+        promise.resolve(status)
+    } catch (e: Exception) {
+        promise.reject("Error", e)
+    }
+  }
+
+  private fun deleteRecursive(file: File): Boolean {
+        return if (file.isDirectory) {
+            val children = file.listFiles()
+            if (children != null) {
+                for (child in children) {
+                    val success = deleteRecursive(child)
+                    if (!success) {
+                        return false
+                    }
+                }
+            }
+            file.delete()
+        } else {
+            file.delete()
+        }
+    }
+
+    @ReactMethod
+    fun clearInternalCache(promise: Promise) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val cacheDir = reactContext.cacheDir
+                val success = deleteRecursive(cacheDir)
+                if (success) {
+                    withContext(Dispatchers.Main) {
+                        promise.resolve(true)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        promise.reject("CLEAR_CACHE_FAILED", "Failed to clear internal cache")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    promise.reject("ERROR", e)
+                }
+            }
+        }
     }
 
     @ReactMethod

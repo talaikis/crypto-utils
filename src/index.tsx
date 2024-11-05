@@ -41,3 +41,13 @@ export async function aesEncrypt (plaintext: String, key: String): Promise<strin
 export async function aesDecrypt (encryptedData: String, key: String): Promise<string> {
   return await Utils.aesDecrypt(encryptedData, key)
 }
+
+export async function getSecurityStatus() {
+  return await Utils.getSecurityStatus();
+}
+
+export async function clearCache(): Promise<any> {
+  if (Platform.OS === 'android') {
+    await Utils.clearInternalCache();
+  }
+}
