@@ -11,7 +11,7 @@ yarn add rn-crypto-utils
 ## Usage
 
 ```js
-import { sha256, generateKeyPair, signData, generateAESKey, aesEncrypt, aesDecrypt } from 'rn-crypto-utils';
+import { sha256, generateKeyPair, signData, generateAESKey, aesEncrypt, aesDecrypt, ... } from 'rn-crypto-utils';
 
 // ...
 
@@ -21,6 +21,9 @@ const signed = await signData('string', privateKey);
 const key = await generateAESKey(256);
 const encrypted = await aesEncrypt('test string', key);
 const decrypted = await aesDecrypt(encrypted, key);
+
+// andoird methods
+await clearCache()
 ```
 
 ## Contributing

@@ -1,6 +1,6 @@
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["Utils_kotlinVersion"]
+  def kotlin_version = rootProject.ext.has("kotlinVersion") ? rootProject.ext.get("kotlinVersion") : project.properties["RnCryptoUtils_kotlinVersion"]
 
   repositories {
     google()
@@ -8,10 +8,15 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:8.3.0"
+    classpath "com.android.tools.build:gradle:7.2.1"
     // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
+}
+
+def reactNativeArchitectures() {
+  def value = rootProject.getProperties().get("reactNativeArchitectures")
+  return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
 }
 
 def isNewArchitectureEnabled() {
@@ -26,11 +31,11 @@ if (isNewArchitectureEnabled()) {
 }
 
 def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["Utils_" + name]
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["RnCryptoUtils_" + name]
 }
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["Utils_" + name]).toInteger()
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["RnCryptoUtils_" + name]).toInteger()
 }
 
 def supportsNamespace() {
@@ -44,7 +49,7 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "com.talaikis.utils"
+    namespace "com.rncryptoutils"
 
     sourceSets {
       main {
@@ -90,9 +95,5 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  // crypto
-  // implementation "org.kotlincrypto.core:common:0.4.0"
-  // implementation "org.kotlincrypto.core:digest:0.4.0"
-  // implementation "org.kotlincrypto.hash:sha2:0.4.0"
-  // implementation "org.kotlincrypto:secure-random:0.2.0"
 }
+
