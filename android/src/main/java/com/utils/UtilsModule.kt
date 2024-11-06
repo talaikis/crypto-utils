@@ -33,7 +33,7 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-  fun getSecurityStatus(promise: Promise) {
+    fun getSecurityStatus(promise: Promise) {
     try {
         val context = reactApplicationContext
         val keyguardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
@@ -45,11 +45,7 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
             keyguardManager.isKeyguardSecure
         }
 
-        val status = mapOf(
-            "isPasscodeEnabled" to isPasscodeEnabled
-        )
-
-        promise.resolve(status)
+        promise.resolve(isPasscodeEnabled)
     } catch (e: Exception) {
         promise.reject("Error", e)
     }
