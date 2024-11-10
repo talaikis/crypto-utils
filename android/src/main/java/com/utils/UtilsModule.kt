@@ -52,6 +52,16 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
   }
 
   private fun deleteRecursive(file: File): Boolean {
+        val excludedExtensions = listOf(".db", ".db-shm", ".db-wal")
+
+        if (file.isDirectory && file.name == "databases") {
+            return true
+        }
+
+        if (file.isFile && excludedExtensions.any { file.name.endsWith(it) }) {
+            return true
+        }
+
         return if (file.isDirectory) {
             val children = file.listFiles()
             if (children != null) {
