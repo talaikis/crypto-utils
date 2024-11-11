@@ -42,12 +42,19 @@ export async function aesDecrypt (encryptedData: String, key: String): Promise<s
   return await Utils.aesDecrypt(encryptedData, key)
 }
 
-export async function getSecurityStatus() {
-  return await Utils.getSecurityStatus();
+export async function getSecurityStatus () {
+  return await Utils.getSecurityStatus()
 }
 
-export async function clearCache(): Promise<any> {
+export async function clearCache (): Promise<any> {
   if (Platform.OS === 'android') {
-    await Utils.clearInternalCache();
+    await Utils.clearInternalCache()
+  }
+}
+
+export const fileExists = async (path: String): Promise<any> => {
+  if (Platform.OS === 'android') {
+    const exists = await Utils.fileExists(path)
+    return exists
   }
 }

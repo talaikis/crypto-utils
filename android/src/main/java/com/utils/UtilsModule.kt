@@ -33,6 +33,16 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
+    fun fileExists(path: String, promise: Promise) {
+        try {
+            val file = File(path)
+            promise.resolve(file.exists())
+        } catch (e: Exception) {
+            promise.reject("FileCheckError", e)
+        }
+    }
+
+    @ReactMethod
     fun getSecurityStatus(promise: Promise) {
     try {
         val context = reactApplicationContext
