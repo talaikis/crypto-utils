@@ -52,9 +52,16 @@ export async function clearCache (): Promise<any> {
   }
 }
 
-export const fileExists = async (path: String): Promise<any> => {
+export async function fileExists (path: String): Promise<any> {
   if (Platform.OS === 'android') {
     const exists = await Utils.fileExists(path)
     return exists
+  }
+}
+
+export async function getDatabaseSize (path: String): Promise<any> {
+  if (Platform.OS === 'android') {
+    const size = await Utils.getDatabaseSize(path)
+    return size
   }
 }

@@ -24,6 +24,7 @@ import java.io.File
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
+import com.facebook.react.bridge.WritableNativeMap
 
 class UtilsModule(private val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -39,6 +40,32 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
             promise.resolve(file.exists())
         } catch (e: Exception) {
             promise.reject("FileCheckError", e)
+        }
+    }
+
+    @ReactMethod
+    fun getDatabaseSize(dbPath: String, promise: Promise) {
+        try {
+            val dbFile = File(dbPath)
+
+            if (!dbFile.exists()) {
+                promise.reject("FILE_NOT_FOUND", "Database file does not exist at path: $dbPath")
+                return
+            }
+
+            if (!dbFile.isFile) {
+                promise.reject("INVALID_PATH", "The path does not point to a file: $dbPath")
+                return
+            }
+
+            val fileSizeInBytes = dbFile.length()
+            val readableSize = formatFileSize(fileSizeInBytes)
+            val resultMap = WritableNativeMap()
+            resultMap.putDouble("sizeInBytes", fileSizeInBytes.toDouble())
+            resultMap.putString("readableSize", readableSize)
+            promise.resolve(resultMap)
+        } catch (e: Exception) {
+            promise.reject("ERROR_GETTING_SIZE", "Failed to get database size", e)
         }
     }
 
@@ -62,7 +89,7 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
   }
 
   private fun deleteRecursive(file: File): Boolean {
-        val excludedExtensions = listOf(".db", ".db-shm", ".db-wal")
+        val excludedExtensions = listOf(".db", "-shm", "-wal", "-journal")
 
         if (file.isDirectory && file.name == "databases") {
             return true
