@@ -110,9 +110,9 @@ class UtilsModule(private val reactContext: ReactApplicationContext) :
             val children = file.listFiles()
             if (children != null) {
                 for (child in children) {
-                    val success = deleteRecursive(child)
-                    if (!success) {
-                        return false
+                    try {
+                        deleteRecursive(child)
+                    } catch (e: Exception) {
                     }
                 }
             }
