@@ -6,5 +6,6 @@ export declare function aesEncrypt(plaintext: String, key: String): Promise<stri
 export declare function aesDecrypt(encryptedData: String, key: String): Promise<string>;
 export declare function getSecurityStatus(): Promise<any>;
 export declare function clearCache(): Promise<any>;
-export declare const fileExists: (path: String) => Promise<any>;
+export declare function fileExists(path: String): Promise<any>;
+export declare function getDatabaseSize(path: String): Promise<any>;
 //# sourceMappingURL=index.d.ts.map
